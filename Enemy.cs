@@ -1,36 +1,27 @@
+using System;
 using UnityEngine;
-using UnityEngine.Pool;
 
 public class Enemy : MonoBehaviour
 {
-    private ObjectPool<Enemy> pool;
-    private Vector3 direction;
+    public event Action<Enemy> HasDestroy;
+
+    private Vector3 _direction;
 
     private void Update()
     {
-        transform.position += direction * Time.deltaTime;
-    }
-
-    public void Initialize(ObjectPool<Enemy> pool)
-    {
-        this.pool = pool;
+        transform.position += _direction * Time.deltaTime;
     }
 
     public void SetDirection(Vector3 direction)
     {
-        this.direction = direction;
-    }
-
-    public void ReturnToPool()
-    {
-        pool?.Release(this);
+        _direction = direction;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.TryGetComponent<DestroyZone>(out _))
         {
-            ReturnToPool();
+            HasDestroy?.Invoke(this);
         }
     }
 }
